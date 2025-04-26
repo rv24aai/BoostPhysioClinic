@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookingSystem {
+    // Lists to store patients, physiotherapists, and treatment appointments
     private List<physioclinics.models.Patient> patients;
     private List<physioclinics.models.Physiotherapist> physiotherapists;
     private List<physioclinics.models.TreatmentAppointment> appointments;
@@ -33,28 +34,26 @@ public class BookingSystem {
     public void addPhysiotherapist(physioclinics.models.Physiotherapist physiotherapist) {
         physiotherapists.add(physiotherapist);
     }
-
+    // Book an available appointment by ID, associating it with the patient and updating the physiotherapist's schedule.
     public boolean bookExistingAppointment(String appointmentId, physioclinics.models.Patient patient) {
         for (physioclinics.models.TreatmentAppointment appointment : appointments) {
             if (appointment.getAppointmentId().equals(appointmentId) && appointment.getStatus().equals("available")) {
                 appointment.setStatus("booked");
                 appointment.setPatient(patient);
-
                 patient.bookAppointment(appointment);
                 appointment.getPhysiotherapist().removeAvailableAppointment(appointment);
-
-                //System.out.println("Appointment " + appointmentId + " booked successfully!");
                 return true;
             }
         }
         System.out.println("Appointment not found or already booked!");
         return false;
     }
+    // Cancel a booked appointment by ID, updating its status and the patient's record.
 
     public boolean cancelAppointment(String appointmentId, physioclinics.models.Patient patient) {
         physioclinics.models.TreatmentAppointment appointmentToCancel = null;
 
-        // Find the appointment by ID.
+        // Locate the appointment
         for (physioclinics.models.TreatmentAppointment appointment : appointments) {
             if (appointment.getAppointmentId().equals(appointmentId)) {
                 appointmentToCancel = appointment;
@@ -62,48 +61,37 @@ public class BookingSystem {
             }
         }
 
-        // Check if the appointment exists and is in a booked status.
+        // Check if the appointment exists and is booked
         if (appointmentToCancel == null || !"booked".equals(appointmentToCancel.getStatus())) {
-            //System.out.println("Appointment not found or cannot be canceled.");
             return false;
         }
-
-        // Mark the appointment as cancelled.
         appointmentToCancel.setStatus("cancelled");
-
-        // Remove the appointment from the global list.
-        //appointments.remove(appointmentToCancel);
-
-        // Update the patient's records (assumes the patient passed in is the one who booked it).
         patient.cancelAppointment(appointmentToCancel);
 
-        // Remove from the physiotherapist's available appointments, if present.
+        // Remove from the physiotherapist's available list if still present
         if (appointmentToCancel.getPhysiotherapist().getAvailableAppointments().contains(appointmentToCancel)) {
             appointmentToCancel.getPhysiotherapist().removeAvailableAppointment(appointmentToCancel);
         }
-
-        //System.out.println("Appointment canceled successfully!");
         return true;
     }
 
-    // In BookingSystem.java
-
+    // Change an appointment booking: cancel the old one and book a new appointment with a different physiotherapist.
     public boolean changeBooking(String oldBookingId, String newPhysioId, String newBookingId, physioclinics.models.Patient patient) {
-        // Step 1: Cancel the original appointment.
+        // Cancel the current appointment
         boolean cancelled = cancelAppointment(oldBookingId, patient);
         if (!cancelled) {
             System.out.println("Error: Could not cancel the old appointment.");
             return false;
         }
 
-        // Step 2: Find the new Physiotherapist by their ID.
+        // Find the new physiotherapist
         physioclinics.models.Physiotherapist newPhysio = findPhysiotherapistById(newPhysioId);
         if (newPhysio == null) {
             System.out.println("Error: No physiotherapist found with ID " + newPhysioId + "!");
             return false;
         }
 
-        // Step 3: Look through the new physiotherapist's available appointments to find the one with the new booking ID.
+        // Search for the new available appointment in the physiotherapist's list
         physioclinics.models.TreatmentAppointment newAppointment = null;
         for (physioclinics.models.TreatmentAppointment app : newPhysio.getAvailableAppointments()) {
             if (app.getAppointmentId().equalsIgnoreCase(newBookingId)) {
@@ -111,27 +99,22 @@ public class BookingSystem {
                 break;
             }
         }
-
         if (newAppointment == null) {
             System.out.println("Error: The new appointment (" + newBookingId + ") is not available for physiotherapist " + newPhysio.getName() + ".");
             return false;
         }
 
-        // Step 4: Book the new appointment.
+        // Book the new appointment
         newAppointment.setStatus("booked");
         newAppointment.setPatient(patient);
         patient.bookAppointment(newAppointment);
         newPhysio.removeAvailableAppointment(newAppointment);
-
-        // Step 5: Confirm the change.
-        //System.out.println("Booking changed successfully!");
         return true;
     }
 
 
-    // Helper method to find a physiotherapist by ID - add this in the same BookingSystem class.
+    // Helper method: find and return a physiotherapist by ID.
     physioclinics.models.Physiotherapist findPhysiotherapistById(String physioId) {
-        // Assuming you have a list of physiotherapists in your BookingSystem, e.g., physiotherapistList.
         for (physioclinics.models.Physiotherapist physio : physiotherapists) {
             if (physio.getId().equalsIgnoreCase(physioId)) {
                 return physio;
@@ -140,21 +123,18 @@ public class BookingSystem {
         return null;
     }
 
+    // Generate a detailed report of treatment appointments and rank physiotherapists by attended sessions.
     public void generateReport() {
         System.out.println("==== Treatment Appointments Report ====\n");
 
-        // Detailed listing: For each physiotherapist, show all related appointments.
+        // Report each physiotherapist's appointments
         for (physioclinics.models.Physiotherapist physio : physiotherapists) {
             System.out.println("Physiotherapist: " + physio.getName() +
                     " (Expertise: " + physio.getExpertise() + ")");
             boolean hasAppointment = false;
-
-            // Iterate over the global appointments list.
             for (physioclinics.models.TreatmentAppointment appointment : appointments) {
-                // Match the appointment with the current physiotherapist.
                 if (appointment.getPhysiotherapist().getId().equalsIgnoreCase(physio.getId())) {
                     hasAppointment = true;
-                    // Use physiotherapist's expertise as a placeholder for treatment name.
                     String treatmentName = physio.getExpertise();
                     String patientName = (appointment.getPatient() != null) ? appointment.getPatient().getName() : "Not Booked";
 
@@ -169,10 +149,10 @@ public class BookingSystem {
             if (!hasAppointment) {
                 System.out.println("  No appointments scheduled for this physiotherapist.");
             }
-            System.out.println(); // Blank line for better separation
+            System.out.println(); // Blank line for separation
         }
 
-        // Ranking section: sort physiotherapists by the count of attended appointments.
+        // Sort and rank physiotherapists based on attended appointment count
         List<physioclinics.models.Physiotherapist> sortedPhysios = new ArrayList<>(physiotherapists);
         sortedPhysios.sort((p1, p2) -> {
             int count1 = (int) appointments.stream()

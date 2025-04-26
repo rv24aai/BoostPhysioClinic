@@ -3,9 +3,6 @@ package physioclinics.models;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a Physiotherapist within the PhysioClinicSystem.
- */
 public class Physiotherapist {
     private String id;
     private String name;
@@ -14,7 +11,7 @@ public class Physiotherapist {
     private String expertise;       // Area of expertise
     private List<TreatmentAppointment> availableAppointments;
 
-    // Updated Constructor including address and telephone
+    //Constructor
     public Physiotherapist(String id, String name, String address, String telephoneNumber, String expertise) {
         this.id = id;
         this.name = name;
@@ -24,7 +21,7 @@ public class Physiotherapist {
         this.availableAppointments = new ArrayList<>();
     }
 
-    // Getters and Setters for new fields
+    // Getters and Setters
     public String getAddress() {
         return address;
     }

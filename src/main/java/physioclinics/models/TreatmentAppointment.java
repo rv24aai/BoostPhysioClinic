@@ -10,7 +10,7 @@ public class TreatmentAppointment {
     private physioclinics.models.Physiotherapist physiotherapist;
     private String treatmentName; // New field for the treatment name
 
-    // Updated Constructor with treatmentName parameter
+    // Constructor
     public TreatmentAppointment(String appointmentId, LocalDateTime dateTime, String status, physioclinics.models.Patient patient, physioclinics.models.Physiotherapist physiotherapist, String treatmentName) {
         this.appointmentId = appointmentId;
         this.dateTime = dateTime;
@@ -20,7 +20,6 @@ public class TreatmentAppointment {
         this.treatmentName = treatmentName;
     }
 
-    // Alternatively, you could add an overloaded constructor if you want to leave treatmentName unset sometimes.
     // Getters and setters
     public String getAppointmentId() {
         return appointmentId;
