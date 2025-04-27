@@ -51,7 +51,8 @@ public class Main {
                     for (physioclinics.models.TreatmentAppointment appointment : bookedAppointments) {
                         if ("booked".equalsIgnoreCase(appointment.getStatus())) {
                             String bookPatientId = (appointment.getPatient() != null) ? appointment.getPatient().getId() : "N/A";
-                            System.out.println("-Appointment ID: " + appointment.getAppointmentId() + ", Patient ID: " + bookPatientId);
+                            String physioId = (appointment.getPhysiotherapist() != null) ? appointment.getPhysiotherapist().getId() : "N/A";
+                            System.out.println("-Appointment ID: " + appointment.getAppointmentId() + ", Patient ID: " + bookPatientId + ", Physiotherapist ID: " + physioId);
                             foundBooked = true;
                         }
                     }
